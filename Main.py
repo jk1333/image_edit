@@ -198,6 +198,7 @@ with col_right:
             with st.spinner("Editing..."):
                 #By default is mask free mode
                 mask = None
+                new_base_image = base_image
 
                 #If it is masked rect based edit mode
                 if len(st.session_state['origin_rects']) > 0:
@@ -206,7 +207,6 @@ with col_right:
                     col1, col2 = st.columns(2)
                     col1.image(base_image)
                     col2.image(mask_image)
-                    new_base_image = base_image
                     mask = Image(get_image_bytes(mask_image))
                 
                 #If target resolution is changed

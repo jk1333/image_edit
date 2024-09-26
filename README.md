@@ -242,3 +242,63 @@ CREATE 를 클릭합니다.
 </table>
 
 ![image](https://raw.githubusercontent.com/jk1333/handson/main/images/3/3.png)
+
+# Task 4. Product image 편집 모드 사용하기
+
+* 아래의 프롬프트로 가방을 그려봅니다.
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>에르메스 가방, empty background</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
+가방이 그려지면, 마음에 드는 그림을 골라 Edit 버튼을 눌러 편집 모드로 들어갑니다.
+
+편집에 가방에 올라가면, 우측 판넬에서 Edit mode 를 product-image 로 바꾼 후,
+
+Edit Prompt에 아래와 같은 프롬프트를 입력 후 가방을 업데이트 합니다.
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>응접실, 탁자, 화분, 시계, 조명</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
+![image](https://raw.githubusercontent.com/jk1333/handson/main/images/3/4.png)
+
+# Task 5. Outpainting 편집 모드 사용하기
+
+위에서 그린 그림에 대해 Edit 버튼을 클릭하여 편집 모드로 가져옵니다. (혹은 새로 생성해도 됩니다.)
+
+편집에 이미지가 올라가면, 우측 판넬에서 Edit mode를 outpainting 으로 바꾼 후,
+
+Outpaint width 값을 2048 로 수정 후 Edit image 버튼을 누릅니다.
+
+![image](https://raw.githubusercontent.com/jk1333/handson/main/images/3/5.png)
+
+# Task 6. Upscale 사용하기
+
+프롬프트로 예제 이미지를 생성합니다.
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>응접실, 탁자, 화분, 시계, 조명</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
+생성된 이미지에서 선택 박스를 눌러 4096 으로 바꾼 후 Upscale 버튼을 누릅니다.
+
+Upscale 후 Download 버튼을 눌러 결과물을 확인합니다.
