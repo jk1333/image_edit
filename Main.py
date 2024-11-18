@@ -99,7 +99,7 @@ def generate_image(model, language, prompt, negative_prompt, ratio, seed = 0):
     return response.images
 
 def upscale_image(image, new_size = 2048):
-    model = ImageGenerationModel.from_pretrained("imagegeneration@002")
+    model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
     return model.upscale_image(image, new_size)
 
 def edit_image_mask(
