@@ -27,10 +27,6 @@ def get_client():
         project=aiplatform.initializer.global_config.project,
         location=aiplatform.initializer.global_config.location)
 
-client = genai.Client(vertexai=True,
-        project=aiplatform.initializer.global_config.project,
-        location=aiplatform.initializer.global_config.location)
-
 if 'generated_image' not in st.session_state:
     st.session_state['generated_image'] = []
 
@@ -138,7 +134,7 @@ def edit_image_mask(model,
     base_steps = None,
     dilation = None
 ):
-    response = client.models.edit_image(
+    response = get_client().models.edit_image(
         model = model,
         prompt = prompt,
         reference_images = [
