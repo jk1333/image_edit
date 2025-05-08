@@ -32,7 +32,7 @@ Container image URL에는 아래의 내용을 입력합니다.
 <table>
   <thead>
     <tr>
-      <th><strong>asia-northeast1-docker.pkg.dev/sandbox-373102/education/image_tester:v1</strong></th>
+      <th><strong>asia-northeast1-docker.pkg.dev/sandbox-373102/education/image_tester:latest</strong></th>
     </tr>
   </thead>
   <tbody>
