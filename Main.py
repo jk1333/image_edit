@@ -7,6 +7,9 @@ from streamlit_img_label.manage import ImageManager
 from google.cloud import aiplatform
 from google import genai
 from google.genai import types
+from vertexai.preview.vision_models import Image
+from vertexai.preview.vision_models import ImageSegmentationModel
+from vertexai.preview.vision_models import Scribble
 
 st.set_page_config(layout='wide')
 
@@ -17,6 +20,8 @@ MAX_IMAGE_EDIT_SIZE = 700
 GENERATION_MODELS = ["imagen-3.0-generate-002", "imagen-3.0-fast-generate-001"]
 EDIT_MODEL = "imagen-3.0-capability-001"
 UPSCALE_MODEL = "imagen-3.0-generate-002"
+SEGMENTATION_MODEL = "image-segmentation-001"
+SEGMENTATION_MODE = ["foreground", "background", "semantic", "prompt", "interactive"]
 GUIDANCE_SCALE = [10.0, 5.0, 20.0]
 BASE_STEPS = 75
 DILATION = 0.03
@@ -26,6 +31,10 @@ def get_client():
     return genai.Client(vertexai=True,
         project=aiplatform.initializer.global_config.project,
         location=aiplatform.initializer.global_config.location)
+
+@st.cache_resource
+def get_seg_client():
+    return ImageSegmentationModel.from_pretrained(SEGMENTATION_MODEL)
 
 if 'generated_image' not in st.session_state:
     st.session_state['generated_image'] = []
@@ -43,6 +52,12 @@ def get_image_bytes(roi_img):
     img_byte_arr = io.BytesIO()
     roi_img.save(img_byte_arr, format='PNG')
     return img_byte_arr.getvalue()
+
+def fill_color(org_image, rects, color):
+    draw = ImageDraw.Draw(org_image)
+    for rect in rects:
+        crop = [rect['left'], rect['top'], rect['left'] + rect['width'], rect['top'] + rect['height']]
+        draw.rectangle(crop, fill=color)
 
 def get_rect_from_vertices(vertices, label):
     min_x = 9999
@@ -186,14 +201,25 @@ with col_left:
             st.session_state['origin_rects'] = st.session_state['selected_image'].revoke_resized_rect(resized_rects)
             #if len(resized_rects) > 0:
             #    st.session_state['origin_rects'] = st.session_state['selected_image'].revoke_resized_rect(resized_rects)
+        cols = st.columns(3)
+        seg_mode = cols[0].selectbox('Segmentation mode', SEGMENTATION_MODE)
+        seg_prompt = cols[1].text_input("Segmentation prompt")
+        dilation = cols[2].text_input("Mask dilation", 0.1)
+        if len(seg_prompt) == 0:
+            seg_prompt = None
+        if st.button("Get masks", use_container_width=True):
+            base_image = st.session_state['selected_image'].get_img()
+            if seg_mode == "interactive":
+                mask_image = PIL.Image.new("RGBA", (base_image.width, base_image.height), color="black")
+                fill_color(mask_image, st.session_state['origin_rects'], "white")
+                scribble = Scribble(image_bytes=get_image_bytes(mask_image))
+                response = get_seg_client().segment_image(Image(get_image_bytes(base_image)), mode=seg_mode, scribble=scribble)
+            else:
+                response = get_seg_client().segment_image(Image(get_image_bytes(base_image)), mode=seg_mode, prompt=seg_prompt, mask_dilation=float(dilation))
+            for mask in response.masks:
+                st.image(mask._pil_image)
     else:
         st.session_state['origin_rects'] = []
-
-def fill_color(org_image, rects, color):
-    draw = ImageDraw.Draw(org_image)
-    for rect in rects:
-        crop = [rect['left'], rect['top'], rect['left'] + rect['width'], rect['top'] + rect['height']]
-        draw.rectangle(crop, fill=color)
 
 #https://github.com/GoogleCloudPlatform/generative-ai/blob/main/vision/getting-started/image_editing_maskmode.ipynb
 with col_right:
@@ -203,9 +229,10 @@ with col_right:
         language = cols[0].selectbox("Language", LANGUAGE)
         ratio = cols[1].selectbox("Generation Ratio", RATIO)
         model = cols[2].selectbox("Model", GENERATION_MODELS)
+        enhance = cols[3].checkbox("Enhance prompt", True)
         if cols[3].button("Generate image", use_container_width=True):
             with st.spinner("Generating..."):
-                st.session_state['generated_image'] = generate_image(model, language, generation_text, negative_text, ratio)
+                st.session_state['generated_image'] = generate_image(model, language, generation_text, negative_text, ratio, enhance)
     #for edit
     with st.container(border=1):
         cols = st.columns([2, 2, 1])
