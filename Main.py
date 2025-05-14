@@ -236,7 +236,7 @@ with col_right:
     #for edit
     with st.container(border=1):
         cols = st.columns([2, 2, 1])
-        edit_mode = cols[0].selectbox('Edit mode', ("EDIT_MODE_INPAINT_INSERTION", "EDIT_MODE_INPAINT_REMOVAL", "EDIT_MODE_OUTPAINT", "EDIT_MODE_PRODUCT_IMAGE"))
+        edit_mode = cols[0].selectbox('Edit mode', ("EDIT_MODE_INPAINT_INSERTION", "EDIT_MODE_INPAINT_REMOVAL", "EDIT_MODE_OUTPAINT", "EDIT_MODE_BGSWAP"))
         mask_mode = cols[1].selectbox("Mask mode", ("MASK_MODE_USER_PROVIDED", "MASK_MODE_FOREGROUND", "MASK_MODE_BACKGROUND", "MASK_MODE_SEMANTIC"))
         guidance_scale = cols[2].selectbox("guidance_scale", GUIDANCE_SCALE)
         #if edit_mode == "inpainting-remove":
@@ -264,6 +264,7 @@ with col_right:
             with st.spinner("Editing..."):
                 #By default is mask free mode
                 new_base_image = base_image
+                mask_image = None
 
                 #If it is masked rect based edit mode
                 if len(st.session_state['origin_rects']) > 0:
@@ -286,7 +287,7 @@ with col_right:
                     col2.image(mask_image)
                 
                 st.session_state['generated_image'] = edit_image_mask(EDIT_MODEL, types.Image(image_bytes = get_image_bytes(new_base_image)), 
-                                                                     types.Image(image_bytes = get_image_bytes(mask_image)), 
+                                                                     types.Image(image_bytes = get_image_bytes(mask_image)) if mask_image != None else None, 
                                                                      language, prompt, negative_prompt, edit_mode, mask_mode, guidance_scale, base_steps, dilation)
 
     for idx, image in enumerate(st.session_state['generated_image']):
