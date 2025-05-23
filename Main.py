@@ -13,11 +13,12 @@ from vertexai.preview.vision_models import Scribble
 
 st.set_page_config(layout='wide')
 
-LANGUAGE = ['en']
+LANGUAGE = ['ko', 'en']
 RATIO = ["1:1", "9:16", "16:9", "4:3", "3:4"]
 UPSCALE = ["x2", "x4"]
 MAX_IMAGE_EDIT_SIZE = 700
-GENERATION_MODELS = ["imagen-3.0-generate-002", "imagen-3.0-fast-generate-001"]
+GENERATION_MODELS = ["imagen-3.0-generate-002", "imagen-3.0-fast-generate-001", 
+                     "imagen-4.0-ultra-generate-exp-05-20", "imagen-4.0-generate-preview-05-20"]
 EDIT_MODEL = "imagen-3.0-capability-001"
 UPSCALE_MODEL = "imagen-3.0-generate-002"
 SEGMENTATION_MODEL = "image-segmentation-001"
@@ -106,17 +107,24 @@ def rects_to_bbox(rects):
     return return_rects
 
 def generate_image(model, language, prompt, negative_prompt, ratio, seed = 0, enhance_prompt = True):
+    if model.startswith("imagen-4.0-ultra"):
+        number_of_images = 1
+        language = None
+    else:
+        number_of_images = 4
+        language = language,
+
     response = get_client().models.generate_images(
         model = model,
         prompt = prompt,
         config = types.GenerateImagesConfig(
             negative_prompt = negative_prompt,
-            number_of_images = 4,
+            number_of_images = number_of_images,
             aspect_ratio = ratio,
             include_rai_reason = True,
-            language = language,
             add_watermark = True,
             #seed = seed,
+            #language=language,
             enhance_prompt = enhance_prompt,
             safety_filter_level = types.SafetyFilterLevel.BLOCK_ONLY_HIGH,
             person_generation = types.PersonGeneration.ALLOW_ADULT,
@@ -174,7 +182,7 @@ def edit_image_mask(model,
             person_generation = types.PersonGeneration.ALLOW_ADULT,
             include_rai_reason = True,
             output_mime_type = "image/png",
-            language = language,
+            #language = language,
             edit_mode = edit_mode,
             base_steps = base_steps
         )
@@ -225,12 +233,13 @@ with col_left:
 with col_right:
     #for generation
     with st.container(border=1):
-        cols = st.columns(4)
-        language = cols[0].selectbox("Language", LANGUAGE)
-        ratio = cols[1].selectbox("Generation Ratio", RATIO)
-        model = cols[2].selectbox("Model", GENERATION_MODELS)
-        enhance = cols[3].checkbox("Enhance prompt", True)
-        if cols[3].button("Generate image", use_container_width=True):
+        cols = st.columns([1, 2, 1])
+        #language = cols[0].selectbox("Language", LANGUAGE)
+        language = None
+        ratio = cols[0].selectbox("Generation Ratio", RATIO)
+        model = cols[1].selectbox("Model", GENERATION_MODELS)
+        enhance = cols[2].checkbox("Enhance prompt", True)
+        if cols[2].button("Generate image", use_container_width=True):
             with st.spinner("Generating..."):
                 st.session_state['generated_image'] = generate_image(model, language, generation_text, negative_text, ratio, enhance)
     #for edit
