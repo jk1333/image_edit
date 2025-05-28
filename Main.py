@@ -25,7 +25,6 @@ SEGMENTATION_MODEL = "image-segmentation-001"
 SEGMENTATION_MODE = ["foreground", "background", "semantic", "prompt", "interactive"]
 GUIDANCE_SCALE = [10.0, 5.0, 20.0]
 BASE_STEPS = 75
-DILATION = 0.03
 
 @st.cache_resource
 def get_client():
@@ -189,6 +188,18 @@ def edit_image_mask(model,
     )
     return response.generated_images
 
+def get_default_model_config(edit_mode):
+    match edit_mode:
+        case "EDIT_MODE_INPAINT_INSERTION":
+            return {"guidance_scale": 60, "dilation": 0.01}
+        case "EDIT_MODE_INPAINT_REMOVAL":
+            return {"guidance_scale": 75, "dilation": 0.01}
+        case "EDIT_MODE_BGSWAP":
+            return {"guidance_scale": 75, "dilation": 0.0}
+        case "EDIT_MODE_OUTPAINT":
+            return {"guidance_scale": 75, "dilation": 0.02}
+    return None
+
 col_left, col_right = st.columns(2)
 
 with col_left:
@@ -247,7 +258,8 @@ with col_right:
         cols = st.columns([2, 2, 1])
         edit_mode = cols[0].selectbox('Edit mode', ("EDIT_MODE_INPAINT_INSERTION", "EDIT_MODE_INPAINT_REMOVAL", "EDIT_MODE_OUTPAINT", "EDIT_MODE_BGSWAP"))
         mask_mode = cols[1].selectbox("Mask mode", ("MASK_MODE_USER_PROVIDED", "MASK_MODE_FOREGROUND", "MASK_MODE_BACKGROUND", "MASK_MODE_SEMANTIC"))
-        guidance_scale = cols[2].selectbox("guidance_scale", GUIDANCE_SCALE)
+        default_config = get_default_model_config(edit_mode)
+        guidance_scale = cols[2].selectbox("guidance_scale", [default_config['guidance_scale']] + GUIDANCE_SCALE)
         #if edit_mode == "inpainting-remove":
         #    mask_mode = None
         #if len(guidance_scale) == 0:
@@ -262,7 +274,7 @@ with col_right:
     
         cols = st.columns(3)
         base_steps = int(cols[0].text_input("Base steps", BASE_STEPS))
-        dilation = float(cols[1].text_input("Dilation", DILATION))
+        dilation = float(cols[1].text_input("Dilation", default_config['dilation']))
         if st.session_state['selected_image'] != None:
             base_image = st.session_state['selected_image'].get_img()
             if edit_mode == "EDIT_MODE_OUTPAINT":
