@@ -17,10 +17,15 @@ LANGUAGE = ['ko', 'en']
 RATIO = ["1:1", "9:16", "16:9", "4:3", "3:4"]
 UPSCALE = ["x2", "x4"]
 MAX_IMAGE_EDIT_SIZE = 700
-GENERATION_MODELS = ["imagen-3.0-generate-002", "imagen-3.0-fast-generate-001", 
-                     "imagen-4.0-ultra-generate-exp-05-20", "imagen-4.0-generate-preview-05-20"]
+GENERATION_MODELS = [
+                     "imagen-4.0-ultra-generate-preview-06-06",
+                     "imagen-4.0-generate-preview-06-06",
+                     "imagen-4.0-fast-generate-preview-06-06",
+                     "imagen-3.0-generate-002", 
+                     "imagen-3.0-fast-generate-001"
+                     ]
 EDIT_MODEL = "imagen-3.0-capability-001"
-UPSCALE_MODEL = "imagen-4.0-ultra-generate-exp-05-20"
+UPSCALE_MODEL = "imagen-4.0-ultra-generate-preview-06-06"
 SEGMENTATION_MODEL = "image-segmentation-001"
 SEGMENTATION_MODE = ["foreground", "background", "semantic", "prompt", "interactive"]
 GUIDANCE_SCALE = [10.0, 5.0, 20.0]
